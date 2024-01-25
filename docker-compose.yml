@@ -13,3 +13,11 @@ services:
       POSTGRES_PASSWORD: uala_db_password
     volumes:
       - ./migrations/postgres:/docker-entrypoint-initdb.d
+  uala_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres

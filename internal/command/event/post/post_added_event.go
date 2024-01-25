@@ -3,9 +3,7 @@ package post
 import "uala/internal/command/event"
 
 type PostAddedEvent struct {
-	event.EventBase
-	ID      string
-	Content string
+	event.Event
 }
 
 func (pae *PostAddedEvent) Type() string {

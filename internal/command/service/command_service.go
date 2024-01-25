@@ -4,13 +4,16 @@ import (
 	"uala/internal/command/event/post"
 	"uala/internal/command/eventpublisher"
 	"uala/internal/command/repository"
-	"uala/pkg/event"
 )
 
 type CommandService interface {
 	AddPost(event post.PostAddedEvent) (post.PostAddedEvent, error)
 	UpdatePost(event post.PostUpdatedEvent) (post.PostUpdatedEvent, error)
 	DeletePost(event post.PostDeletedEvent) (post.PostDeletedEvent, error)
+	// TODO:
+	//AddComment(event post.PostAddedEvent) (comment.CommentAddedEvent, error)
+	//UpdateComment(event post.PostUpdatedEvent) (comment.CommentUpdatedEvent, error)
+	//DeleteComment(event post.PostDeletedEvent) (comment.CommentDeletedEvent, error)
 }
 
 type commandService struct {
@@ -18,7 +21,7 @@ type commandService struct {
 	EventPublisher       eventpublisher.EventPublisher
 }
 
-func NewCommandService(store repository.EventStore, publisher event.EventPublisher) CommandService {
+func NewCommandService(store repository.EventStore, publisher eventpublisher.EventPublisher) CommandService {
 	return &commandService{
 		EventStoreRepository: store,
 		EventPublisher:       publisher,

@@ -2,15 +2,13 @@ package event
 
 import "time"
 
-type Event interface {
-	Type()
-	GetDateCreated()
-}
-
-type EventBase struct {
+type Event struct {
+	ID          uint64
+	Type        string
+	Content     string
 	DateCreated time.Time
 }
 
-func (eb *EventBase) GetDateCreated() time.Time {
-	return eb.DateCreated
+func (e *Event) GetDateCreated() time.Time {
+	return e.DateCreated
 }

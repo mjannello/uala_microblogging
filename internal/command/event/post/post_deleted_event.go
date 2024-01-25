@@ -3,9 +3,7 @@ package post
 import "uala/internal/command/event"
 
 type PostDeletedEvent struct {
-	event.EventBase
-	ID      string
-	Content string
+	event.Event
 }
 
 func (pde *PostDeletedEvent) Type() string {

@@ -1,10 +1,18 @@
 package rabbitmq
 
-type RabbitMQEventPublisher struct {
+import (
+	"uala/internal/command/eventpublisher"
+)
+
+type rabbitMQEventPublisher struct {
 	// TODO: Set RabbitMQ config
 }
 
-func (rep *RabbitMQEventPublisher) Publish(topic string, eventData interface{}) error {
+func NewRabbitMQEventPublisher() eventpublisher.EventPublisher {
+	return &rabbitMQEventPublisher{}
+}
+
+func (rep *rabbitMQEventPublisher) Publish(topic string, eventData interface{}) error {
 	// TODO: Implement RabbitMQ publish method
 	return nil
 }

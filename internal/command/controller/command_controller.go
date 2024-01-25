@@ -6,26 +6,32 @@ import (
 )
 
 type CommandController interface {
-	AddPost(w http.ResponseWriter, r *http.Request) error
-	UpdatePost(w http.ResponseWriter, r *http.Request) error
-	DeletePost(w http.ResponseWriter, r *http.Request) error
+	AddPost(w http.ResponseWriter, r *http.Request)
+	UpdatePost(w http.ResponseWriter, r *http.Request)
+	DeletePost(w http.ResponseWriter, r *http.Request)
 }
 
 type commandController struct {
-	PostCommandService *service.CommandService
+	commandService service.CommandService
 }
 
-func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) error {
+func NewCommandController(cs service.CommandService) CommandController {
+	return &commandController{
+		commandService: cs,
+	}
+}
+
+func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement AddPost
-	return nil
+	return
 }
 
-func (cc *commandController) UpdatePost(w http.ResponseWriter, r *http.Request) error {
+func (cc *commandController) UpdatePost(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement UpdatePost
-	return nil
+	return
 }
 
-func (cc *commandController) DeletePost(w http.ResponseWriter, r *http.Request) error {
+func (cc *commandController) DeletePost(w http.ResponseWriter, r *http.Request) {
 	// TODO: Implement DeletePost
-	return nil
+	return
 }
