@@ -1,0 +1,15 @@
+# docker-compose.yml
+
+version: '3'
+
+services:
+  postgres:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: uala_events_postgres
+      POSTGRES_USER: mjannello
+      POSTGRES_PASSWORD: uala_db_password
+    volumes:
+      - ./migrations/postgres:/docker-entrypoint-initdb.d
