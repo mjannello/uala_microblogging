@@ -5,6 +5,7 @@ version: '3'
 services:
   postgres:
     image: postgres:alpine
+    hostname: postgres
     ports:
       - "5432:5432"
     environment:
@@ -13,10 +14,12 @@ services:
       POSTGRES_PASSWORD: uala_db_password
     volumes:
       - ./migrations/postgres:/docker-entrypoint-initdb.d
-  uala_app:
+
+
+  command-app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "8080:8080"
     depends_on:

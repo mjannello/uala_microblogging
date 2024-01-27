@@ -8,23 +8,32 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-
 	"syscall"
 	commandcontroller "uala/internal/command/controller"
 	commandeventpublisher "uala/internal/command/eventpublisher/rabbitmq"
 	commandrepository "uala/internal/command/repository/postgres"
 	commandservice "uala/internal/command/service"
 	httprouter "uala/internal/http"
+	clock "uala/pkg/clock"
 )
 
 func main() {
-	db := connectDB()
+	db, err := sqlx.Open("postgres", "postgresql://mjannello:uala_db_password@postgres:5432/uala_events_postgres?sslmode=disable")
+	if err != nil {
+		log.Fatal("Fail when connecting to db:", err)
+	}
+	defer db.Close()
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	realClock := clock.NewClock()
 	eventStore := commandrepository.NewPostgresEventStore(db)
 
 	eventPublisher := commandeventpublisher.NewRabbitMQEventPublisher()
 
-	commandService := commandservice.NewCommandService(eventStore, eventPublisher)
+	commandService := commandservice.NewCommandService(eventStore, eventPublisher, realClock)
 
 	commandController := commandcontroller.NewCommandController(commandService)
 
@@ -50,20 +59,6 @@ func main() {
 
 	<-stopChan
 
-}
-
-func connectDB() *sqlx.DB {
-	db, err := sqlx.Open("postgres", "user=mjannello dbname=uala_events_postgres password=uala_db_password sslmode=disable")
-	if err != nil {
-		log.Fatal("Fail when connecting to db:", err)
-	}
-	defer func(db *sqlx.DB) {
-		err := db.Close()
-		if err != nil {
-
-		}
-	}(db)
-	return db
 }
 
 func run(server *http.Server) error {

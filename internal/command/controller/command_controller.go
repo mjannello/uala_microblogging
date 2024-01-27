@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
 	"uala/internal/command/service"
 )
@@ -22,8 +23,24 @@ func NewCommandController(cs service.CommandService) CommandController {
 }
 
 func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement AddPost
-	return
+	var requestData PostCreatedDto
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	createdPost, err := cc.commandService.AddPost(requestData.UserName, requestData.Content)
+	if err != nil {
+		http.Error(w, "Error processing AddPost command", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(createdPost)
+	if err != nil {
+		return
+	}
 }
 
 func (cc *commandController) UpdatePost(w http.ResponseWriter, r *http.Request) {

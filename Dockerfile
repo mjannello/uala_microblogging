@@ -1,14 +1,20 @@
+# Dockerfile
 FROM golang:1.21
 
 WORKDIR /app
 
+# Copiar el go.mod para inicializar el módulo
 COPY go.mod .
-COPY go.sum .
 
+# Instalar dependencias y herramientas
+RUN go mod tidy
 RUN go mod download
 
+# Copiar el resto del código
 COPY . .
 
-RUN go build -o uala_app cmd/command/main.go
+# Build de la aplicación
+RUN go build -o command-app cmd/command/main.go
 
-CMD ["./uala_app"]
+# Comando para ejecutar las migraciones
+CMD ["./command-app"]

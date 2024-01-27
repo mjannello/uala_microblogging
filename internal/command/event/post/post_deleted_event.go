@@ -1,11 +1,22 @@
 package post
 
-import "uala/internal/command/event"
+import "time"
 
 type PostDeletedEvent struct {
-	event.Event
+	ID          string
+	UserName    string
+	Content     string
+	DateCreated time.Time
+	Type        string
 }
 
-func (pde *PostDeletedEvent) Type() string {
-	return "PostDeletedEvent"
+func NewPostDeletedEvent(userID, content string) PostDeletedEvent {
+	return PostDeletedEvent{
+		UserName: userID,
+		Content:  content,
+	}
+}
+
+func (pde PostDeletedEvent) EventType() string {
+	return pde.Type
 }
