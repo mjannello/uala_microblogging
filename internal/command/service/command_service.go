@@ -37,12 +37,17 @@ func (s *commandService) AddPost(userID, content string) (post.PostAddedEvent, e
 
 	createdPostEvent := post.NewPostAddedEvent(userID, content, s.Clock.Time())
 
-	if err := s.EventPublisher.Publish(createdPostEvent); err != nil {
-		logger.Logger.Printf("error publishing event", err)
+	eventID, err := s.EventStoreRepository.SaveEvent(createdPostEvent)
+
+	if err != nil {
+		logger.Logger.Printf("error storing event", err)
 		return post.PostAddedEvent{}, err
 	}
-	if err := s.EventStoreRepository.SaveEvent(createdPostEvent); err != nil {
-		logger.Logger.Printf("error storing event", err)
+
+	createdPostEvent.ID = eventID
+
+	if err := s.EventPublisher.Publish(createdPostEvent); err != nil {
+		logger.Logger.Printf("error publishing event", err)
 		return post.PostAddedEvent{}, err
 	}
 

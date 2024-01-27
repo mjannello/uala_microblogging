@@ -3,7 +3,7 @@ package post
 import "time"
 
 type PostAddedEvent struct {
-	ID          string
+	ID          int64
 	UserName    string
 	Content     string
 	DateCreated time.Time

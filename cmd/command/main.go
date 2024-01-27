@@ -27,11 +27,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	realClock := clock.NewClock()
 	eventStore := commandrepository.NewPostgresEventStore(db)
 
-	eventPublisher := commandeventpublisher.NewRabbitMQEventPublisher()
+	eventPublisher, err := commandeventpublisher.NewRabbitMQEventPublisher()
+
+	realClock := clock.NewClock()
 
 	commandService := commandservice.NewCommandService(eventStore, eventPublisher, realClock)
 
