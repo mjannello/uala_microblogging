@@ -8,7 +8,7 @@ import (
 	"uala/pkg/logger"
 )
 
-const rabbitMQURL = "amqp://guest:guest@rabbitmq:5672/"
+const rabbitMQURL = "amqp://guest:guest@rabbitmq/"
 
 type rabbitMQEventPublisher struct {
 	Connection *amqp.Connection

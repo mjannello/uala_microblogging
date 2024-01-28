@@ -9,7 +9,7 @@ import (
 	"uala/pkg/logger"
 )
 
-const rabbitMQURL = "amqp://guest:guest@rabbitmq:5672/"
+const rabbitMQURL = "amqp://guest:guest@rabbitmq/"
 
 type rabbitMQEventConsumer struct {
 	queryService service.QueryService

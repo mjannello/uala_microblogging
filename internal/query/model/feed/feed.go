@@ -15,7 +15,8 @@ type Post struct {
 }
 
 type Comment struct {
-	ID          string
+	ID          int64
+	PostID      int64
 	UserName    string
 	Content     string
 	DateCreated time.Time
@@ -23,6 +24,8 @@ type Comment struct {
 }
 
 type Reaction struct {
-	ID    string
-	Emoji string
+	ID        int64
+	PostID    int64
+	CommentID int64
+	Emoji     string
 }

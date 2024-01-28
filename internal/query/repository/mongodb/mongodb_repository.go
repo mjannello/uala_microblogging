@@ -68,6 +68,10 @@ func (mr *mongoDBRepository) GetFeed() (feed.Feed, error) {
 			DateCreated: result["datecreated"].(primitive.DateTime).Time(),
 		}
 
+		comments := mr.extractComments(result)
+
+		post.Comments = comments
+
 		posts = append(posts, post)
 	}
 
@@ -80,6 +84,21 @@ func (mr *mongoDBRepository) GetFeed() (feed.Feed, error) {
 	}
 
 	return feed, nil
+}
+
+func (mr *mongoDBRepository) extractComments(result bson.M) []feed.Comment {
+	var comments []feed.Comment
+	commentsArrayRaw := result["comments"].(primitive.A)
+	for _, commentMapRaw := range commentsArrayRaw {
+		m := commentMapRaw.(primitive.M)
+		comment := feed.Comment{
+			ID:      m["id"].(int64),
+			Content: m["content"].(string),
+		}
+		comments = append(comments, comment)
+
+	}
+	return comments
 }
 
 func (mr *mongoDBRepository) GetFeedByUser(userName string) (feed.Feed, error) {
@@ -144,4 +163,23 @@ func (mr *mongoDBRepository) DeletePost(userName string, postDeletedID int64) (i
 	}
 
 	return postDeletedID, nil
+}
+
+func (mr *mongoDBRepository) AddCommentToPost(postID int64, comment feed.Comment) error {
+	collection := mr.client.Database(dbName).Collection(postsCollection)
+
+	filter := bson.M{"id": postID}
+
+	update := bson.M{
+		"$push": bson.M{"comments": comment},
+	}
+
+	updated, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		logger.Logger.Print("fallo al actualizar")
+		return fmt.Errorf("error adding comment to post: %w", err)
+	}
+	logger.Logger.Print(updated)
+
+	return nil
 }

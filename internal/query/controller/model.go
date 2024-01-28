@@ -17,10 +17,10 @@ type PostDTO struct {
 }
 
 type CommentDTO struct {
-	UserName    string
-	Content     string
-	DateCreated time.Time
-	Reactions   []ReactionDTO
+	UserName    string        `json:"user_name"`
+	Content     string        `json:"content"`
+	DateCreated time.Time     `json:"date_created"`
+	Reactions   []ReactionDTO `json:"reactions"`
 }
 
 type ReactionDTO struct {
@@ -29,7 +29,6 @@ type ReactionDTO struct {
 
 func FeedModelToRest(f feed.Feed) FeedDTO {
 	var postsDTO []PostDTO
-
 	for _, post := range f.Posts {
 		postDTO := PostModelToRest(post)
 		postsDTO = append(postsDTO, postDTO)

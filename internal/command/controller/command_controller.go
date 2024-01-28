@@ -13,6 +13,7 @@ type CommandController interface {
 	AddPost(w http.ResponseWriter, r *http.Request)
 	UpdatePost(w http.ResponseWriter, r *http.Request)
 	DeletePost(w http.ResponseWriter, r *http.Request)
+	AddCommentToPost(w http.ResponseWriter, r *http.Request)
 }
 
 type commandController struct {
@@ -99,6 +100,36 @@ func (cc *commandController) DeletePost(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 	err = json.NewEncoder(w).Encode(deletedPost)
 	if err != nil {
+		return
+	}
+}
+
+func (cc *commandController) AddCommentToPost(w http.ResponseWriter, r *http.Request) {
+	postIDStr := mux.Vars(r)["post_id"]
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid post ID", http.StatusBadRequest)
+		return
+	}
+	userName := r.Header.Get("user_name")
+
+	var requestData CommentAddedDto
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Error decoding request body", http.StatusBadRequest)
+		return
+	}
+
+	createdComment, err := cc.commandService.AddCommentToPost(postID, userName, requestData.Content)
+	if err != nil {
+		http.Error(w, "Error processing AddCommentToPost command", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(createdComment)
+	if err != nil {
+		// Handle encoding error
 		return
 	}
 }

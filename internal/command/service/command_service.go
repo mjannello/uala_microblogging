@@ -3,6 +3,7 @@ package service
 import (
 	"uala/internal/command/eventpublisher"
 	"uala/internal/command/eventstore"
+	commentmodel "uala/internal/model/comment"
 	postmodel "uala/internal/model/post"
 	"uala/pkg/clock"
 	"uala/pkg/logger"
@@ -12,8 +13,7 @@ type CommandService interface {
 	AddPost(userName, content string) (postmodel.PostAddedEvent, error)
 	UpdatePost(userName, content string, id int64) (postmodel.PostUpdatedEvent, error)
 	DeletePost(userName string, id int64) (postmodel.PostDeletedEvent, error)
-	// TODO:
-	//AddComment(model post.PostAddedEvent) (comment.CommentAddedEvent, error)
+	AddCommentToPost(postID int64, userName, content string) (commentmodel.CommentAddedEvent, error)
 	//UpdateComment(model post.PostUpdatedEvent) (comment.CommentUpdatedEvent, error)
 	//DeleteComment(model post.PostDeletedEvent) (comment.CommentDeletedEvent, error)
 }
@@ -46,7 +46,6 @@ func (s *commandService) AddPost(userName, content string) (postmodel.PostAddedE
 	}
 
 	createdPostEvent.ID = eventID
-	logger.Logger.Print("just to publish event")
 	if err := s.eventPublisher.Publish(createdPostEvent); err != nil {
 		logger.Logger.Printf("error publishing model", err)
 		return postmodel.PostAddedEvent{}, err
@@ -95,4 +94,26 @@ func (s *commandService) DeletePost(userName string, id int64) (postmodel.PostDe
 	}
 
 	return deletedPostEvent, nil
+}
+
+func (s *commandService) AddCommentToPost(postID int64, userName, content string) (commentmodel.CommentAddedEvent, error) {
+	logger.Logger.Printf("add comment to postID")
+
+	createdCommentEvent := commentmodel.NewCommentAddedEvent(postID, userName, content, s.clock.Time())
+
+	logger.Logger.Printf("save event")
+	eventID, err := s.eventStoreRepository.SaveEvent(createdCommentEvent)
+
+	if err != nil {
+		logger.Logger.Printf("error storing model", err)
+		return commentmodel.CommentAddedEvent{}, err
+	}
+
+	createdCommentEvent.ID = eventID
+	if err := s.eventPublisher.Publish(createdCommentEvent); err != nil {
+		logger.Logger.Printf("error publishing model", err)
+		return commentmodel.CommentAddedEvent{}, err
+	}
+
+	return createdCommentEvent, nil
 }

@@ -23,4 +23,6 @@ func (rh *RouterHandler) routeURLs(router *mux.Router) {
 	router.HandleFunc("/api/post", rh.CommandController.AddPost).Methods("POST")
 	router.HandleFunc("/api/post/{id}", rh.CommandController.UpdatePost).Methods("PUT")
 	router.HandleFunc("/api/post/{id}", rh.CommandController.DeletePost).Methods("DELETE")
+	router.HandleFunc("/api/comment/{post_id}", rh.CommandController.AddCommentToPost).Methods("POST")
+
 }

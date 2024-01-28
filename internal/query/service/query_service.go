@@ -121,8 +121,29 @@ func (qs *queryService) handlePostUpdatedEvent(eventData map[string]interface{})
 	return nil
 }
 
-func (qs *queryService) handleCommentAddedEvent(data map[string]interface{}) error {
-	return nil
+func (qs *queryService) handleCommentAddedEvent(eventData map[string]interface{}) error {
+	logger.Logger.Print(eventData)
+	commentIDFloat, ok := eventData["ID"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid comment ID")
+	}
+	commentIDInt := int64(commentIDFloat)
+
+	postIDFloat, ok := eventData["PostID"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid post ID")
+	}
+	postIDInt := int64(postIDFloat)
+
+	comment := feed.Comment{
+		ID:          commentIDInt,
+		PostID:      postIDInt,
+		UserName:    eventData["UserName"].(string),
+		Content:     eventData["Content"].(string),
+		DateCreated: parseDateString(eventData["DateCreated"].(string)),
+	}
+
+	return qs.queryRepository.AddCommentToPost(postIDInt, comment)
 }
 
 func parseDateString(dateString string) time.Time {
