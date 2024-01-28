@@ -2,7 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strconv"
 	"uala/internal/command/service"
 	"uala/pkg/logger"
 )
@@ -50,6 +52,27 @@ func (cc *commandController) UpdatePost(w http.ResponseWriter, r *http.Request) 
 }
 
 func (cc *commandController) DeletePost(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement DeletePost
-	return
+	userName := r.Header.Get("user_name")
+
+	vars := mux.Vars(r)
+
+	postIDStr := vars["id"]
+
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	deletedPost, err := cc.commandService.DeletePost(userName, postID)
+	if err != nil {
+		http.Error(w, "Error processing DeletePost command", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	err = json.NewEncoder(w).Encode(deletedPost)
+	if err != nil {
+		return
+	}
 }

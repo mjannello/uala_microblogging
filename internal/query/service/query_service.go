@@ -45,6 +45,8 @@ func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface
 	switch eventType {
 	case "PostAddedEvent":
 		err = qs.handlePostAddedEvent(eventData)
+	case "PostDeletedEvent":
+		err = qs.handlePostDeletedEvent(eventData)
 	case "CommentAddedEvent":
 		err = qs.handleCommentAddedEvent(eventData)
 	default:
@@ -58,14 +60,38 @@ func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface
 
 func (qs *queryService) handlePostAddedEvent(eventData map[string]interface{}) error {
 	logger.Logger.Print(eventData)
+	postIDFloat, ok := eventData["ID"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid post ID")
+	}
+
+	postIDInt := int64(postIDFloat)
 
 	postCreated := feed.Post{
+		ID:          postIDInt,
 		UserName:    eventData["UserName"].(string),
 		Content:     eventData["Content"].(string),
 		DateCreated: parseDateString(eventData["DateCreated"].(string)),
 		Comments:    []feed.Comment{},
 	}
 	_, err := qs.queryRepository.SavePost(postCreated)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (qs *queryService) handlePostDeletedEvent(eventData map[string]interface{}) error {
+	logger.Logger.Print(eventData)
+	postToDeleteIDFloat, ok := eventData["PostDeletedID"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid post to delete ID")
+	}
+	postToDeleteIDInt := int64(postToDeleteIDFloat)
+
+	userName := eventData["UserName"].(string)
+	postDeletedID := postToDeleteIDInt
+	_, err := qs.queryRepository.DeletePost(userName, postDeletedID)
 	if err != nil {
 		return err
 	}

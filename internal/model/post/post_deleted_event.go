@@ -3,17 +3,20 @@ package post
 import "time"
 
 type PostDeletedEvent struct {
-	ID          int64
-	UserName    string
-	Content     string
-	DateCreated time.Time
-	Type        string
+	ID            int64
+	UserName      string
+	Content       string
+	PostDeletedID int64
+	DateCreated   time.Time
+	Type          string
 }
 
-func NewPostDeletedEvent(userID, content string) PostDeletedEvent {
+func NewPostDeletedEvent(userName string, postDeletedID int64, timeNow time.Time) PostDeletedEvent {
 	return PostDeletedEvent{
-		UserName: userID,
-		Content:  content,
+		Type:          "PostDeletedEvent",
+		UserName:      userName,
+		PostDeletedID: postDeletedID,
+		DateCreated:   timeNow,
 	}
 }
 
@@ -34,6 +37,9 @@ func (pde PostDeletedEvent) GetDate() time.Time {
 }
 
 func (pde PostDeletedEvent) GetData() map[string]interface{} {
-	// TODO: implement
-	return nil
+	return map[string]interface{}{
+		"UserName":      pde.UserName,
+		"PostDeletedID": pde.PostDeletedID,
+		"DateCreated":   pde.DateCreated,
+	}
 }

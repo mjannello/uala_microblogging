@@ -62,6 +62,7 @@ func (mr *mongoDBRepository) GetFeed() (feed.Feed, error) {
 		logger.Logger.Print("result", result)
 
 		post := feed.Post{
+			ID:          result["id"].(int64),
 			UserName:    result["username"].(string),
 			Content:     result["content"].(string),
 			DateCreated: result["datecreated"].(primitive.DateTime).Time(),
@@ -100,4 +101,24 @@ func (mr *mongoDBRepository) SavePost(post feed.Post) (string, error) {
 	}
 
 	return insertedID, nil
+}
+
+func (mr *mongoDBRepository) DeletePost(userName string, postDeletedID int64) (int64, error) {
+	collection := mr.client.Database(dbName).Collection(postsCollection)
+
+	filter := bson.D{
+		{"username", userName},
+		{"id", postDeletedID},
+	}
+
+	result, err := collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return 0, fmt.Errorf("error al eliminar el post: %w", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return 0, fmt.Errorf("there was no post ID %d for the user %s", postDeletedID, userName)
+	}
+
+	return postDeletedID, nil
 }

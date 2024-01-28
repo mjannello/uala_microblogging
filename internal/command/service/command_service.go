@@ -3,15 +3,15 @@ package service
 import (
 	"uala/internal/command/eventpublisher"
 	"uala/internal/command/eventstore"
-	post2 "uala/internal/model/post"
+	postmodel "uala/internal/model/post"
 	"uala/pkg/clock"
 	"uala/pkg/logger"
 )
 
 type CommandService interface {
-	AddPost(userID, content string) (post2.PostAddedEvent, error)
-	UpdatePost(event post2.PostUpdatedEvent) (post2.PostUpdatedEvent, error)
-	DeletePost(event post2.PostDeletedEvent) (post2.PostDeletedEvent, error)
+	AddPost(userName, content string) (postmodel.PostAddedEvent, error)
+	UpdatePost(userName, content string) (postmodel.PostUpdatedEvent, error)
+	DeletePost(username string, id int64) (postmodel.PostDeletedEvent, error)
 	// TODO:
 	//AddComment(model post.PostAddedEvent) (comment.CommentAddedEvent, error)
 	//UpdateComment(model post.PostUpdatedEvent) (comment.CommentUpdatedEvent, error)
@@ -32,35 +32,51 @@ func NewCommandService(store eventstore.EventStore, publisher eventpublisher.Eve
 	}
 }
 
-func (s *commandService) AddPost(userID, content string) (post2.PostAddedEvent, error) {
+func (s *commandService) AddPost(userName, content string) (postmodel.PostAddedEvent, error) {
 	logger.Logger.Printf("add post")
 
-	createdPostEvent := post2.NewPostAddedEvent(userID, content, s.clock.Time())
+	createdPostEvent := postmodel.NewPostAddedEvent(userName, content, s.clock.Time())
 
 	logger.Logger.Printf("save event")
 	eventID, err := s.eventStoreRepository.SaveEvent(createdPostEvent)
 
 	if err != nil {
 		logger.Logger.Printf("error storing model", err)
-		return post2.PostAddedEvent{}, err
+		return postmodel.PostAddedEvent{}, err
 	}
 
 	createdPostEvent.ID = eventID
 	logger.Logger.Print("just to publish event")
 	if err := s.eventPublisher.Publish(createdPostEvent); err != nil {
 		logger.Logger.Printf("error publishing model", err)
-		return post2.PostAddedEvent{}, err
+		return postmodel.PostAddedEvent{}, err
 	}
 
 	return createdPostEvent, nil
 }
 
-func (s *commandService) UpdatePost(event post2.PostUpdatedEvent) (post2.PostUpdatedEvent, error) {
+func (s *commandService) UpdatePost(userName, content string) (postmodel.PostUpdatedEvent, error) {
 	// TODO: Implement UpdatePost
-	return post2.PostUpdatedEvent{}, nil
+	return postmodel.PostUpdatedEvent{}, nil
 }
 
-func (s *commandService) DeletePost(event post2.PostDeletedEvent) (post2.PostDeletedEvent, error) {
-	// TODO: Implement DeletePost
-	return post2.PostDeletedEvent{}, nil
+func (s *commandService) DeletePost(userName string, id int64) (postmodel.PostDeletedEvent, error) {
+	logger.Logger.Printf("delete post")
+
+	deletedPostEvent := postmodel.NewPostDeletedEvent(userName, id, s.clock.Time())
+
+	eventID, err := s.eventStoreRepository.SaveEvent(deletedPostEvent)
+
+	if err != nil {
+		logger.Logger.Printf("error storing model", err)
+		return postmodel.PostDeletedEvent{}, err
+	}
+
+	deletedPostEvent.ID = eventID
+	if err := s.eventPublisher.Publish(deletedPostEvent); err != nil {
+		logger.Logger.Printf("error publishing model", err)
+		return postmodel.PostDeletedEvent{}, err
+	}
+
+	return deletedPostEvent, nil
 }

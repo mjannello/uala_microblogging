@@ -6,7 +6,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"uala/internal/command/eventstore"
 	"uala/internal/model"
-	"uala/pkg/logger"
 )
 
 const (
@@ -24,7 +23,6 @@ func NewPostgresEventStore(db *sqlx.DB) eventstore.EventStore {
 }
 
 func (pes *postgresEventStore) SaveEvent(event model.Event) (int64, error) {
-	logger.Logger.Printf("repository save event")
 	tx, err := pes.db.Beginx()
 	if err != nil {
 		return 0, fmt.Errorf("could not begin transaction for saving model: %w", err)
@@ -45,7 +43,6 @@ func (pes *postgresEventStore) SaveEvent(event model.Event) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to commit transaction on saving model: %w", err)
 	}
-	logger.Logger.Print("last inserted id:%d", lastInsertID)
 
 	return lastInsertID, nil
 }
