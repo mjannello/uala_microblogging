@@ -47,6 +47,8 @@ func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface
 		err = qs.handlePostAddedEvent(eventData)
 	case "PostDeletedEvent":
 		err = qs.handlePostDeletedEvent(eventData)
+	case "PostUpdatedEvent":
+		err = qs.handlePostUpdatedEvent(eventData)
 	case "CommentAddedEvent":
 		err = qs.handleCommentAddedEvent(eventData)
 	default:
@@ -98,9 +100,31 @@ func (qs *queryService) handlePostDeletedEvent(eventData map[string]interface{})
 	return nil
 }
 
+func (qs *queryService) handlePostUpdatedEvent(eventData map[string]interface{}) error {
+	logger.Logger.Print(eventData)
+	postToUpdateIDFloat, ok := eventData["PostUpdatedID"].(float64)
+	if !ok {
+		return fmt.Errorf("invalid post to update ID")
+	}
+	postToUpdateIDInt := int64(postToUpdateIDFloat)
+
+	postUpdated := feed.Post{
+		ID:      postToUpdateIDInt,
+		Content: eventData["Content"].(string),
+	}
+
+	userName := eventData["UserName"].(string)
+	err := qs.queryRepository.UpdatePost(userName, postUpdated)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (qs *queryService) handleCommentAddedEvent(data map[string]interface{}) error {
 	return nil
 }
+
 func parseDateString(dateString string) time.Time {
 	parsedTime, err := time.Parse(time.RFC3339Nano, dateString)
 	if err != nil {

@@ -103,6 +103,29 @@ func (mr *mongoDBRepository) SavePost(post feed.Post) (string, error) {
 	return insertedID, nil
 }
 
+func (mr *mongoDBRepository) UpdatePost(userName string, postUpdated feed.Post) error {
+	collection := mr.client.Database(dbName).Collection(postsCollection)
+
+	filter := bson.D{
+		{"username", userName},
+		{"id", postUpdated.ID},
+	}
+
+	update := bson.D{
+		{"$set", bson.D{
+			{"content", postUpdated.Content},
+		}},
+	}
+
+	_, err := collection.UpdateOne(context.Background(), filter, update)
+
+	if err != nil {
+		return fmt.Errorf("could not update post in MongoDB: %w", err)
+	}
+
+	return nil
+}
+
 func (mr *mongoDBRepository) DeletePost(userName string, postDeletedID int64) (int64, error) {
 	collection := mr.client.Database(dbName).Collection(postsCollection)
 

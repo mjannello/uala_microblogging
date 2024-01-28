@@ -26,13 +26,14 @@ func NewCommandController(cs service.CommandService) CommandController {
 }
 
 func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) {
+	userName := r.Header.Get("user_name")
 	var requestData PostCreatedDto
 	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
 		http.Error(w, "Error decoding request body", http.StatusBadRequest)
 		return
 	}
 	logger.Logger.Print(requestData)
-	createdPost, err := cc.commandService.AddPost(requestData.UserName, requestData.Content)
+	createdPost, err := cc.commandService.AddPost(userName, requestData.Content)
 	if err != nil {
 		http.Error(w, "Error processing AddPost command", http.StatusInternalServerError)
 		return
@@ -47,8 +48,33 @@ func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (cc *commandController) UpdatePost(w http.ResponseWriter, r *http.Request) {
-	// TODO: Implement UpdatePost
-	return
+	userName := r.Header.Get("user_name")
+
+	vars := mux.Vars(r)
+
+	postIDStr := vars["id"]
+
+	postID, err := strconv.ParseInt(postIDStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid post ID", http.StatusBadRequest)
+		return
+	}
+	var requestData PostUpdatedDto
+	if err := json.NewDecoder(r.Body).Decode(&requestData); err != nil {
+		http.Error(w, "Error decoding request body", http.StatusBadRequest)
+		return
+	}
+	updatedPost, err := cc.commandService.UpdatePost(userName, requestData.Content, postID)
+	if err != nil {
+		http.Error(w, "Error processing UpdatePost command", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	err = json.NewEncoder(w).Encode(updatedPost)
+	if err != nil {
+		return
+	}
 }
 
 func (cc *commandController) DeletePost(w http.ResponseWriter, r *http.Request) {

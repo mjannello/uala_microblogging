@@ -1,6 +1,9 @@
 package controller
 
 type PostCreatedDto struct {
-	UserName string `json:"user_name"`
-	Content  string `json:"content"`
+	Content string `json:"content"`
+}
+
+type PostUpdatedDto struct {
+	Content string `json:"new_content"`
 }

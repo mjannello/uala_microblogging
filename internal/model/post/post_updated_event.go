@@ -3,17 +3,21 @@ package post
 import "time"
 
 type PostUpdatedEvent struct {
-	ID          int64
-	UserName    string
-	Content     string
-	DateCreated time.Time
-	Type        string
+	ID            int64
+	UserName      string
+	Content       string
+	PostUpdatedID int64
+	DateCreated   time.Time
+	Type          string
 }
 
-func NewPostUpdatedEvent(userID, content string) PostUpdatedEvent {
+func NewPostUpdatedEvent(userName, content string, postUpdatedID int64, timeNow time.Time) PostUpdatedEvent {
 	return PostUpdatedEvent{
-		UserName: userID,
-		Content:  content,
+		Type:          "PostUpdatedEvent",
+		UserName:      userName,
+		Content:       content,
+		PostUpdatedID: postUpdatedID,
+		DateCreated:   timeNow,
 	}
 }
 
@@ -31,4 +35,13 @@ func (pue PostUpdatedEvent) GetUserName() string {
 
 func (pue PostUpdatedEvent) GetDate() time.Time {
 	return pue.DateCreated
+}
+
+func (pue PostUpdatedEvent) GetData() map[string]interface{} {
+	return map[string]interface{}{
+		"UserName":      pue.UserName,
+		"PostDeletedID": pue.PostUpdatedID,
+		"Content":       pue.Content,
+		"DateCreated":   pue.DateCreated,
+	}
 }

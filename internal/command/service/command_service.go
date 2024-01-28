@@ -10,8 +10,8 @@ import (
 
 type CommandService interface {
 	AddPost(userName, content string) (postmodel.PostAddedEvent, error)
-	UpdatePost(userName, content string) (postmodel.PostUpdatedEvent, error)
-	DeletePost(username string, id int64) (postmodel.PostDeletedEvent, error)
+	UpdatePost(userName, content string, id int64) (postmodel.PostUpdatedEvent, error)
+	DeletePost(userName string, id int64) (postmodel.PostDeletedEvent, error)
 	// TODO:
 	//AddComment(model post.PostAddedEvent) (comment.CommentAddedEvent, error)
 	//UpdateComment(model post.PostUpdatedEvent) (comment.CommentUpdatedEvent, error)
@@ -55,9 +55,25 @@ func (s *commandService) AddPost(userName, content string) (postmodel.PostAddedE
 	return createdPostEvent, nil
 }
 
-func (s *commandService) UpdatePost(userName, content string) (postmodel.PostUpdatedEvent, error) {
-	// TODO: Implement UpdatePost
-	return postmodel.PostUpdatedEvent{}, nil
+func (s *commandService) UpdatePost(userName, content string, id int64) (postmodel.PostUpdatedEvent, error) {
+	logger.Logger.Printf("update post")
+
+	updatedPostEvent := postmodel.NewPostUpdatedEvent(userName, content, id, s.clock.Time())
+
+	eventID, err := s.eventStoreRepository.SaveEvent(updatedPostEvent)
+
+	if err != nil {
+		logger.Logger.Printf("error storing model", err)
+		return postmodel.PostUpdatedEvent{}, err
+	}
+
+	updatedPostEvent.ID = eventID
+	if err := s.eventPublisher.Publish(updatedPostEvent); err != nil {
+		logger.Logger.Printf("error publishing model", err)
+		return postmodel.PostUpdatedEvent{}, err
+	}
+
+	return updatedPostEvent, nil
 }
 
 func (s *commandService) DeletePost(userName string, id int64) (postmodel.PostDeletedEvent, error) {
