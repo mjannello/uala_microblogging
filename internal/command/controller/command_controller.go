@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"uala/internal/command/service"
+	"uala/pkg/logger"
 )
 
 type CommandController interface {
@@ -28,7 +29,7 @@ func (cc *commandController) AddPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error decoding request body", http.StatusBadRequest)
 		return
 	}
-
+	logger.Logger.Print(requestData)
 	createdPost, err := cc.commandService.AddPost(requestData.UserName, requestData.Content)
 	if err != nil {
 		http.Error(w, "Error processing AddPost command", http.StatusInternalServerError)

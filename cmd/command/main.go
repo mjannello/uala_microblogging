@@ -10,11 +10,11 @@ import (
 	"os/signal"
 	"syscall"
 	commandcontroller "uala/internal/command/controller"
-	commandeventpublisher "uala/internal/command/eventpublisher/rabbitmq"
-	commandrepository "uala/internal/command/repository/postgres"
+	commandeventpublisher "uala/internal/command/eventpublisher/rabbitmq_producer"
+	commandrepository "uala/internal/command/eventstore/postgres"
 	commandservice "uala/internal/command/service"
-	httprouter "uala/internal/http"
-	clock "uala/pkg/clock"
+	httprouter "uala/internal/http/command"
+	"uala/pkg/clock"
 )
 
 func main() {
@@ -30,7 +30,6 @@ func main() {
 	eventStore := commandrepository.NewPostgresEventStore(db)
 
 	eventPublisher, err := commandeventpublisher.NewRabbitMQEventPublisher()
-
 	realClock := clock.NewClock()
 
 	commandService := commandservice.NewCommandService(eventStore, eventPublisher, realClock)

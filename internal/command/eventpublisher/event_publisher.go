@@ -1,9 +1,9 @@
 package eventpublisher
 
 import (
-	"uala/internal/command/event"
+	"uala/internal/model"
 )
 
 type EventPublisher interface {
-	Publish(event event.Event) error
+	Publish(event model.Event) error
 }

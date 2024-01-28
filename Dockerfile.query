@@ -1,0 +1,14 @@
+FROM golang:1.21
+
+WORKDIR /app
+
+COPY go.mod .
+
+RUN go mod tidy
+RUN go mod download
+
+COPY . .
+
+RUN go build -o query-app cmd/query/main.go
+
+CMD ["./query-app"]

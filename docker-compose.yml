@@ -4,7 +4,7 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:alpine
+    image: postgres:9.5
     hostname: postgres
     ports:
       - "5432:5432"
@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: mjannello
       POSTGRES_PASSWORD: uala_db_password
     volumes:
-      - ./migrations/postgres:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
   rabbitmq:
     image: "rabbitmq:3-management"
     ports:
@@ -22,12 +22,30 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
-
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-data:/data/db
   command-app:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile.command
     ports:
       - "8080:8080"
     depends_on:
       - postgres
+      - rabbitmq
+  query-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.query
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mongodb
+      - command-app
+volumes:
+  postgres_data:
+    driver: local
