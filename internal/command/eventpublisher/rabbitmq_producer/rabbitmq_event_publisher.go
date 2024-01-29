@@ -5,7 +5,6 @@ import (
 	"github.com/streadway/amqp"
 	"uala/internal/command/eventpublisher"
 	"uala/internal/model"
-	"uala/pkg/logger"
 )
 
 const rabbitMQURL = "amqp://guest:guest@rabbitmq/"
@@ -16,17 +15,14 @@ type rabbitMQEventPublisher struct {
 }
 
 func NewRabbitMQEventPublisher() (eventpublisher.EventPublisher, error) {
-	logger.Logger.Print("starting publisher")
 	connection, err := amqp.Dial(rabbitMQURL)
 	if err != nil {
 		return nil, err
 	}
-	logger.Logger.Print("connection:", connection)
 	channel, err := connection.Channel()
 	if err != nil {
 		return nil, err
 	}
-	logger.Logger.Print("channel:", channel)
 
 	err = setupExchangeAndQueues(channel)
 	if err != nil {

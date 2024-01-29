@@ -92,17 +92,14 @@ func (mr *mongoDBRepository) extractComments(result bson.M) []feed.Comment {
 	for _, commentMapRaw := range commentsArrayRaw {
 		m := commentMapRaw.(primitive.M)
 		comment := feed.Comment{
-			ID:      m["id"].(int64),
-			Content: m["content"].(string),
+			ID:       m["id"].(int64),
+			Content:  m["content"].(string),
+			UserName: m["username"].(string),
 		}
 		comments = append(comments, comment)
 
 	}
 	return comments
-}
-
-func (mr *mongoDBRepository) GetFeedByUser(userName string) (feed.Feed, error) {
-	return feed.Feed{}, nil
 }
 
 func (mr *mongoDBRepository) SavePost(post feed.Post) (string, error) {

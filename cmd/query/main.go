@@ -21,17 +21,25 @@ func main() {
 	}
 
 	queryService := service.NewQueryService(mongoDBRepo)
+	eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
 
-	go func() {
-		eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
-		if err != nil {
-			log.Fatal("Error setting up events consumer:", err)
-		}
+	if err != nil {
+		log.Fatal("Error setting up events consumer:", err)
+	}
 
-		if err := eventConsumer.StartConsuming(); err != nil {
-			log.Fatal("Error starting events consumer:", err)
-		}
-	}()
+	if err := eventConsumer.StartConsuming(); err != nil {
+		log.Fatal("Error starting events consumer:", err)
+	}
+	//go func() {
+	//	eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
+	//	if err != nil {
+	//		log.Fatal("Error setting up events consumer:", err)
+	//	}
+	//
+	//	if err := eventConsumer.StartConsuming(); err != nil {
+	//		log.Fatal("Error starting events consumer:", err)
+	//	}
+	//}()
 
 	queryController := querycontroller.NewQueryController(queryService)
 

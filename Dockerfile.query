@@ -11,4 +11,4 @@ COPY . .
 
 RUN go build -o query-app cmd/query/main.go
 
-CMD ["./query-app"]
+CMD ["/bin/sh", "-c","sleep 10 && ./query-app"]

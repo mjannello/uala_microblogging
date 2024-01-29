@@ -14,8 +14,10 @@ services:
       POSTGRES_PASSWORD: uala_db_password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./migrations/postgres:/docker-entrypoint-initdb.d
   rabbitmq:
     image: "rabbitmq:3-management"
+    restart: always
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -34,16 +36,19 @@ services:
       dockerfile: Dockerfile.command
     ports:
       - "8080:8080"
+    restart: always
     depends_on:
-      - postgres
       - rabbitmq
+      - postgres
   query-app:
     build:
       context: .
       dockerfile: Dockerfile.query
     ports:
       - "8081:8080"
+    restart: always
     depends_on:
+      - rabbitmq
       - mongodb
       - command-app
 volumes:

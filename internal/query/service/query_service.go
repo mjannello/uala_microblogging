@@ -11,7 +11,6 @@ import (
 
 type QueryService interface {
 	GetFeed() (feed.Feed, error)
-	GetFeedByUser(userName string) (feed.Feed, error)
 	UpdateRepositoryWithEvent(map[string]interface{}) error
 }
 
@@ -28,10 +27,6 @@ func NewQueryService(r repository.QueryRepository) QueryService {
 func (qs *queryService) GetFeed() (feed.Feed, error) {
 	return qs.queryRepository.GetFeed()
 
-}
-
-func (qs *queryService) GetFeedByUser(userName string) (feed.Feed, error) {
-	return qs.queryRepository.GetFeedByUser(userName)
 }
 
 func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface{}) error {

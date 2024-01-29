@@ -8,7 +8,6 @@ import (
 
 type QueryController interface {
 	GetFeed(w http.ResponseWriter, r *http.Request)
-	GetFeedByUser(w http.ResponseWriter, r *http.Request)
 }
 
 type queryController struct {
@@ -31,17 +30,4 @@ func (qc *queryController) GetFeed(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(feedDTO)
-}
-
-func (qc *queryController) GetFeedByUser(w http.ResponseWriter, r *http.Request) {
-	username := r.URL.Query().Get("user_name")
-
-	userFeed, err := qc.queryService.GetFeedByUser(username)
-	if err != nil {
-		http.Error(w, "Error getting user feed", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(userFeed)
 }
