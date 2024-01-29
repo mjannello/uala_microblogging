@@ -15,9 +15,11 @@ import (
 	commandservice "uala/internal/command/service"
 	httprouter "uala/internal/http/command"
 	"uala/pkg/clock"
+	"uala/pkg/logger"
 )
 
 func main() {
+	logger.Logger.Print("starting command app")
 	db, err := sqlx.Open("postgres", "postgresql://mjannello:uala_db_password@postgres:5432/uala_events_postgres?sslmode=disable")
 	if err != nil {
 		log.Fatal("Fail when connecting to db:", err)

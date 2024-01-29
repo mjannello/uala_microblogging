@@ -2,7 +2,9 @@
 
 ## CQRS and Event Sourcing App
 
-This application, named uala_microblogging, employs the CQRS (Command Query Responsibility Segregation) and Event Sourcing architectural patterns. Its primary goal is to provide a scalable and efficient solution for managing posts, comments, and user interactions.
+This application, named uala_microblogging, employs the CQRS (Command Query Responsibility Segregation) and Event Sourcing architectural patterns. Its primary goal is to provide a scalable and efficient solution for managing posts, comments, and user interactions. 
+
+With the use of RabbitMQ it includes a manager running on port 15672 to check the status of the queues and messages.
 
 ## Purpose
 
@@ -28,6 +30,8 @@ The application leverages the power of events to capture state changes. The key 
 
 Endpoints
 ---------
+
+Every endpoint accepts the header **user_name** with a string as value with the name of the user. 
 
 ### Command App
 

@@ -12,42 +12,33 @@ import (
 	"uala/internal/query/eventconsumer/rabbitmq_consumer"
 	"uala/internal/query/repository/mongodb"
 	"uala/internal/query/service"
+	"uala/pkg/logger"
 )
 
 func main() {
+	logger.Logger.Print("starting query app")
 	mongoDBRepo, err := mongodb.NewMongoDBRepository("mongodb://mongodb:27017")
 	if err != nil {
 		log.Fatal("Error connecting to MongoDB:", err)
 	}
 
 	queryService := service.NewQueryService(mongoDBRepo)
-	eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
+	go func() {
+		eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
+		if err != nil {
+			log.Fatal("Error setting up events consumer:", err)
+		}
 
-	if err != nil {
-		log.Fatal("Error setting up events consumer:", err)
-	}
-
-	if err := eventConsumer.StartConsuming(); err != nil {
-		log.Fatal("Error starting events consumer:", err)
-	}
-	//go func() {
-	//	eventConsumer, err := rabbitmq_consumer.NewRabbitMQEventConsumer(queryService)
-	//	if err != nil {
-	//		log.Fatal("Error setting up events consumer:", err)
-	//	}
-	//
-	//	if err := eventConsumer.StartConsuming(); err != nil {
-	//		log.Fatal("Error starting events consumer:", err)
-	//	}
-	//}()
-
+		if err := eventConsumer.StartConsuming(); err != nil {
+			log.Fatal("Error starting events consumer:", err)
+		}
+	}()
 	queryController := querycontroller.NewQueryController(queryService)
 
 	routerHandler := httprouter.NewRouterHandler(queryController)
 
 	router := mux.NewRouter()
 	routerHandler.ConfigureRoutes(router)
-
 	serverAddr := ":8080"
 	server := &http.Server{
 		Addr:    serverAddr,

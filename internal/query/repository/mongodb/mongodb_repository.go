@@ -10,7 +10,6 @@ import (
 	"time"
 	"uala/internal/query/model/feed"
 	"uala/internal/query/repository"
-	"uala/pkg/logger"
 )
 
 const (
@@ -33,18 +32,14 @@ func NewMongoDBRepository(connectionString string) (repository.QueryRepository, 
 }
 
 func (mr *mongoDBRepository) GetFeed() (feed.Feed, error) {
-	logger.Logger.Print("start getting feed")
 	collection := mr.client.Database(dbName).Collection(postsCollection)
-	logger.Logger.Print("collection", collection)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	logger.Logger.Print("cancel", cancel)
 
 	filter := bson.D{}
 
 	cursor, err := collection.Find(ctx, filter)
-	logger.Logger.Print("cursor", cursor)
 
 	if err != nil {
 		return feed.Feed{}, fmt.Errorf("error al obtener las publicaciones: %w", err)
@@ -53,13 +48,11 @@ func (mr *mongoDBRepository) GetFeed() (feed.Feed, error) {
 
 	var posts []feed.Post
 	for cursor.Next(ctx) {
-		logger.Logger.Print("next")
 
 		var result bson.M
 		if err := cursor.Decode(&result); err != nil {
 			return feed.Feed{}, fmt.Errorf("error al decodificar el documento: %w", err)
 		}
-		logger.Logger.Print("result", result)
 
 		post := feed.Post{
 			ID:          result["id"].(int64),
@@ -106,7 +99,6 @@ func (mr *mongoDBRepository) SavePost(post feed.Post) (string, error) {
 	collection := mr.client.Database(dbName).Collection(postsCollection)
 
 	result, err := collection.InsertOne(context.Background(), post)
-	logger.Logger.Print("result", result)
 
 	if err != nil {
 		return "", fmt.Errorf("could not save post to MongoDB: %w", err)
@@ -171,12 +163,10 @@ func (mr *mongoDBRepository) AddCommentToPost(postID int64, comment feed.Comment
 		"$push": bson.M{"comments": comment},
 	}
 
-	updated, err := collection.UpdateOne(context.Background(), filter, update)
+	_, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
-		logger.Logger.Print("fallo al actualizar")
 		return fmt.Errorf("error adding comment to post: %w", err)
 	}
-	logger.Logger.Print(updated)
 
 	return nil
 }

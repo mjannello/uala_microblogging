@@ -6,7 +6,6 @@ import (
 	commentmodel "uala/internal/model/comment"
 	postmodel "uala/internal/model/post"
 	"uala/pkg/clock"
-	"uala/pkg/logger"
 )
 
 type CommandService interface {
@@ -33,21 +32,17 @@ func NewCommandService(store eventstore.EventStore, publisher eventpublisher.Eve
 }
 
 func (s *commandService) AddPost(userName, content string) (postmodel.PostAddedEvent, error) {
-	logger.Logger.Printf("add post")
 
 	createdPostEvent := postmodel.NewPostAddedEvent(userName, content, s.clock.Time())
 
-	logger.Logger.Printf("save event")
 	eventID, err := s.eventStoreRepository.SaveEvent(createdPostEvent)
 
 	if err != nil {
-		logger.Logger.Printf("error storing model", err)
 		return postmodel.PostAddedEvent{}, err
 	}
 
 	createdPostEvent.ID = eventID
 	if err := s.eventPublisher.Publish(createdPostEvent); err != nil {
-		logger.Logger.Printf("error publishing model", err)
 		return postmodel.PostAddedEvent{}, err
 	}
 
@@ -55,20 +50,17 @@ func (s *commandService) AddPost(userName, content string) (postmodel.PostAddedE
 }
 
 func (s *commandService) UpdatePost(userName, content string, id int64) (postmodel.PostUpdatedEvent, error) {
-	logger.Logger.Printf("update post")
 
 	updatedPostEvent := postmodel.NewPostUpdatedEvent(userName, content, id, s.clock.Time())
 
 	eventID, err := s.eventStoreRepository.SaveEvent(updatedPostEvent)
 
 	if err != nil {
-		logger.Logger.Printf("error storing model", err)
 		return postmodel.PostUpdatedEvent{}, err
 	}
 
 	updatedPostEvent.ID = eventID
 	if err := s.eventPublisher.Publish(updatedPostEvent); err != nil {
-		logger.Logger.Printf("error publishing model", err)
 		return postmodel.PostUpdatedEvent{}, err
 	}
 
@@ -76,20 +68,17 @@ func (s *commandService) UpdatePost(userName, content string, id int64) (postmod
 }
 
 func (s *commandService) DeletePost(userName string, id int64) (postmodel.PostDeletedEvent, error) {
-	logger.Logger.Printf("delete post")
 
 	deletedPostEvent := postmodel.NewPostDeletedEvent(userName, id, s.clock.Time())
 
 	eventID, err := s.eventStoreRepository.SaveEvent(deletedPostEvent)
 
 	if err != nil {
-		logger.Logger.Printf("error storing model", err)
 		return postmodel.PostDeletedEvent{}, err
 	}
 
 	deletedPostEvent.ID = eventID
 	if err := s.eventPublisher.Publish(deletedPostEvent); err != nil {
-		logger.Logger.Printf("error publishing model", err)
 		return postmodel.PostDeletedEvent{}, err
 	}
 
@@ -97,21 +86,17 @@ func (s *commandService) DeletePost(userName string, id int64) (postmodel.PostDe
 }
 
 func (s *commandService) AddCommentToPost(postID int64, userName, content string) (commentmodel.CommentAddedEvent, error) {
-	logger.Logger.Printf("add comment to postID")
 
 	createdCommentEvent := commentmodel.NewCommentAddedEvent(postID, userName, content, s.clock.Time())
 
-	logger.Logger.Printf("save event")
 	eventID, err := s.eventStoreRepository.SaveEvent(createdCommentEvent)
 
 	if err != nil {
-		logger.Logger.Printf("error storing model", err)
 		return commentmodel.CommentAddedEvent{}, err
 	}
 
 	createdCommentEvent.ID = eventID
 	if err := s.eventPublisher.Publish(createdCommentEvent); err != nil {
-		logger.Logger.Printf("error publishing model", err)
 		return commentmodel.CommentAddedEvent{}, err
 	}
 

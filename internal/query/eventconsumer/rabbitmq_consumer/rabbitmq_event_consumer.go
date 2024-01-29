@@ -6,7 +6,6 @@ import (
 	"log"
 	"uala/internal/query/eventconsumer"
 	"uala/internal/query/service"
-	"uala/pkg/logger"
 )
 
 const rabbitMQURL = "amqp://guest:guest@rabbitmq/"
@@ -68,7 +67,6 @@ func (c *rabbitMQEventConsumer) consumeEvent(data []byte) error {
 	if err := json.Unmarshal(data, &eventData); err != nil {
 		return err
 	}
-	logger.Logger.Print("consume event eventData", eventData)
 	if err := c.queryService.UpdateRepositoryWithEvent(eventData); err != nil {
 		log.Printf("Error updating repository with event: %v", err)
 		return err

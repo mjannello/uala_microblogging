@@ -30,8 +30,6 @@ func (qs *queryService) GetFeed() (feed.Feed, error) {
 }
 
 func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface{}) error {
-	logger.Logger.Print("eventData", eventData)
-
 	eventType, ok := eventData["Type"].(string)
 	if !ok {
 		return errors.New("type is not a string")
@@ -56,7 +54,6 @@ func (qs *queryService) UpdateRepositoryWithEvent(eventData map[string]interface
 }
 
 func (qs *queryService) handlePostAddedEvent(eventData map[string]interface{}) error {
-	logger.Logger.Print(eventData)
 	postIDFloat, ok := eventData["ID"].(float64)
 	if !ok {
 		return fmt.Errorf("invalid post ID")
@@ -79,7 +76,6 @@ func (qs *queryService) handlePostAddedEvent(eventData map[string]interface{}) e
 }
 
 func (qs *queryService) handlePostDeletedEvent(eventData map[string]interface{}) error {
-	logger.Logger.Print(eventData)
 	postToDeleteIDFloat, ok := eventData["PostDeletedID"].(float64)
 	if !ok {
 		return fmt.Errorf("invalid post to delete ID")
@@ -96,7 +92,6 @@ func (qs *queryService) handlePostDeletedEvent(eventData map[string]interface{})
 }
 
 func (qs *queryService) handlePostUpdatedEvent(eventData map[string]interface{}) error {
-	logger.Logger.Print(eventData)
 	postToUpdateIDFloat, ok := eventData["PostUpdatedID"].(float64)
 	if !ok {
 		return fmt.Errorf("invalid post to update ID")
@@ -117,7 +112,6 @@ func (qs *queryService) handlePostUpdatedEvent(eventData map[string]interface{})
 }
 
 func (qs *queryService) handleCommentAddedEvent(eventData map[string]interface{}) error {
-	logger.Logger.Print(eventData)
 	commentIDFloat, ok := eventData["ID"].(float64)
 	if !ok {
 		return fmt.Errorf("invalid comment ID")
